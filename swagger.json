@@ -1,0 +1,540 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Movie Rating List",
+        "version": "1.0.0",
+        "title": "Movie Rating List"
+    },
+    "host": "localhost:3000",
+    "basePath": "/api",
+    "tags":[
+        {
+            "name":"user",
+            "description":"Operations about user"
+        },
+        {
+            "name":"movie",
+            "description":"Everything about the movies"
+        }
+    ],
+    "schemes": [
+        "http",
+        "https"
+    ],
+    "paths": {
+        "/signup": {
+            "post": {
+                "tags":[
+                    "user"
+                ],
+                "summary": "Add a new user",
+                "description": "",
+                "consumes":[
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name":"body",
+                        "description": "User details that needs to be added",
+                        "required": true,
+                        "schema":{
+                            "type":"object",
+                            "properties":{
+                                "name":{
+                                    "type":"string",
+                                    "required":true
+                                },
+                                "email":{
+                                    "type":"string",
+                                    "required":true
+                                },
+                                "password":{
+                                    "type":"string",
+                                    "required":true
+                                }
+                            }                        
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "success": true,
+                        "description": "User registered"
+                    },
+                    "405": {
+                        "error": true,
+                        "description": "Incorrect input"
+                    }
+                }
+            }
+        },
+        "/login": {
+            "post": {
+                "tags":[
+                    "user"
+                ],
+                "summary": "User login",
+                "description": "",
+                "consumes":[
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name":"body",
+                        "description": "User login",
+                        "required": true,
+                        "schema":{
+                            "type":"object",
+                            "properties":{
+                                "email":{
+                                    "type":"string",
+                                    "required":true
+                                },
+                                "password":{
+                                    "type":"string",
+                                    "required":true
+                                }
+                            }                        
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "success": true,
+                        "description": "User login"
+                    },
+                    "405": {
+                        "error": true,
+                        "description": "Incorrect email or password"
+                    }
+                }
+            }
+        },
+        "/getMovies": {
+            "get": {
+                "tags":[
+                    "movie"
+                ],
+                "summary": "Get movie list",
+                "description": "This can only be done by the logged in user.",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name":"filter",
+                        "description": "Filter for movies",
+                        "required": false,
+                        "type":"string"
+                    },
+                    {
+                        "in": "query",
+                        "name":"page",
+                        "description": "Page number",
+                        "required": false,
+                        "type":"string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "data":[{
+                            "_id":"string",
+                            "name":"string",
+                            "director":"object",
+                            "imdbScore":"string",
+                            "popularity99":"string",
+                            "genre":"array"
+                        }],
+                        "description":"movie data array"
+                    },
+                    "405": {
+                        "error": true,
+                        "description": "Some error occured, try again later"
+                    }
+                }
+            }
+        },
+        "/getSingleMovie": {
+            "get": {
+                "tags":[
+                    "movie"
+                ],
+                "summary": "Get movie list",
+                "description": "This can only be done by the logged in user.",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name":"id",
+                        "description": "Filter for movies",
+                        "required": false,
+                        "type":"string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "data":{
+                            "_id":"string",
+                            "name":"string",
+                            "director":"object",
+                            "imdbScore":"string",
+                            "popularity99":"string",
+                            "genre":"array"
+                        },
+                        "description":"movie object"
+                    },
+                    "405": {
+                        "error": true,
+                        "description": "Some error occured, try again later"
+                    }
+                }
+            }
+        },
+
+        "/addSingleMovie": {
+            "put": {
+                "tags":[
+                    "movie"
+                ],
+                "summary": "Add a single movie",
+                "description": "This can only be done by the logged in user.",
+                "consumes":[
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name":"body",
+                        "description": "Add a movie",
+                        "required": true,
+                        "schema":{
+                            "type":"object",
+                            "properties":{
+                                "name":{
+                                    "type":"string",
+                                    "required":true
+                                },
+                                "imdbScore":{
+                                    "type":"string",
+                                    "required":true
+                                },
+                                "popularity99":{
+                                    "type":"string",
+                                    "required":true
+                                },
+                                "director":{
+                                    "type":"object",
+                                    "properties":{
+                                        "name":{
+                                            "type":"string"
+                                        }
+                                    }
+                                },
+                                "genre":{
+                                    "type":"array",
+                                    "items":{
+                                        "type":"object",
+                                        "properties":{
+                                            "name":{
+                                                "type":"string"
+                                            }
+                                        }
+                                    }
+                                }
+                            }                        
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "success": true,
+                        "description": "User login"
+                    },
+                    "405": {
+                        "error": true,
+                        "description": "Incorrect email or password"
+                    }
+                }
+            }
+        },
+
+        "/addMultipleMovies": {
+            "put": {
+                "tags":[
+                    "movie"
+                ],
+                "summary": "Add a new movie",
+                "description": "This can only be done by the logged in user.",
+                "consumes":[
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name":"body",
+                        "description": "Add a movie",
+                        "required": true,
+                        "schema":{
+                            "type":"array",
+                            "items":{
+                                "type":"object",
+                                "properties":{
+                                    "name":{
+                                        "type":"string",
+                                        "required":true
+                                    },
+                                    "imdbScore":{
+                                        "type":"string",
+                                        "required":true
+                                    },
+                                    "popularity99":{
+                                        "type":"string",
+                                        "required":true
+                                    },
+                                    "director":{
+                                        "type":"object",
+                                        "properties":{
+                                            "name":{
+                                                "type":"string"
+                                            }
+                                        }
+                                    },
+                                    "genre":{
+                                        "type":"array",
+                                        "items":{
+                                            "type":"object",
+                                            "properties":{
+                                                "name":{
+                                                    "type":"string"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }                        
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "success": true,
+                        "description": "Movies added"
+                    },
+                    "405": {
+                        "error": true,
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        },
+        "/editMovie": {
+            "post": {
+                "tags":[
+                    "movie"
+                ],
+                "summary": "Edit a movie",
+                "description": "This can only be done by the logged in user.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name":"body",
+                        "description": "Edit a movie",
+                        "required": true,
+                        "schema":{
+                            "type":"object",
+                            "properties":{
+                                "_id":{
+                                    "type":"string",
+                                    "required":true
+                                },
+                                "name":{
+                                    "type":"string"
+                                },
+                                "director":{
+                                    "type":"object",
+                                    "properties":{
+                                        "name":{
+                                            "type":"string"
+                                        }
+                                    }
+                                },
+                                "imdbScore":{
+                                    "type":"string"
+                                },
+                                "popularity99":{
+                                    "type":"string"
+                                },
+                                "genre":{
+                                    "type":"array",
+                                    "items":{
+                                        "type":"object",
+                                        "properties":{
+                                            "name":{
+                                                "type":"string"
+                                            }
+                                        }
+                                    }
+                                }
+                            }                        
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "success": true,
+                        "description": "Movie updated"
+                    },
+                    "405": {
+                        "error": true,
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        },
+        "/deleteMovie":{
+            "delete":{
+                "tags":[
+                    "movie"
+                ],
+                "summary": "Remove a movie",
+                "description": "This can only be done by the logged in user.",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name":"id",
+                        "description": "Edit a movie",
+                        "required": true,
+                        "type":"string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "success": true,
+                        "description": "Movie deleted"
+                    },
+                    "405": {
+                        "error": true,
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "ApiResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "msg": {
+                    "type": "string"
+                },
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "User": {
+            "type": "object",
+            "properties": {
+                "_id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                }
+            }
+        },
+        "Director": {
+            "type": "object",
+            "properties": {
+                "_id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "Genre": {
+            "type": "object",
+            "properties": {
+                "_id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "Movie": {
+            "type": "object",
+            "properties": {
+                "_id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "imdbScore": {
+                    "type": "string"
+                },
+                "popularity99": {
+                    "type": "string"
+                },
+                "director": {
+                    "type": "string",
+                    "description": "Refrence to Director table"
+                },
+                "genre": {
+                    "type": "array",
+                    "properties":{
+                        "id":"string"
+                    },
+                    "description": "Refrence to Genre table"
+                },
+                "createdBy": {
+                    "type": "string",
+                    "description": "Refrence to User table"
+                },
+                "modifiedBy": {
+                    "type": "string",
+                    "description": "Refrence to User table"
+                }
+            }
+        }
+    }
+}
