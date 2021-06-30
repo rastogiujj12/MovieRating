@@ -5,13 +5,13 @@ const Schema = mongoose.Schema;
 
 const movieSchema = new Schema({
   name:         { type: String, required:true, unique: true, uniqueCaseInsensitive: true },
-  imdbScore:    { type: String, required:true, unique: true, uniqueCaseInsensitive: true },
-  popularity99: { type: String, required:true, unique: true, uniqueCaseInsensitive: true },
-  director:     [{ 
+  imdbScore:    { type: String, required:true },
+  popularity99: { type: String, required:true },
+  director:     { 
     type: Schema.Types.ObjectId, 
     ref: "Director", 
     required:true, 
-  }],
+  },
   genre:        [{ 
     type: Schema.Types.ObjectId, 
     ref: "Genre", 
@@ -24,8 +24,7 @@ const movieSchema = new Schema({
   },
   modifiedBy:{
     type: Schema.Types.ObjectId, 
-    ref: "User", 
-    required:true,
+    ref: "User" 
   }
 });
 

@@ -14,8 +14,8 @@ router.group("/api", (app) => {
   app.post("/login", userController.login);
   app.post("/signup", userController.signup);
   
-  app.get("/getMovies", moviesController.getMovies);
-  app.get("/getSingleMovie", moviesController.getSingleMovie);
+  app.get("/getMovies",   moviesController.getMovies);
+  app.get("/searchMovie", moviesController.searchMovie);
   
   app.put("/addMultipleMovies", 
     authMiddleware.loginValidate,
@@ -35,6 +35,11 @@ router.group("/api", (app) => {
     authMiddleware.loginValidate,
     moviesController.deleteMovie
   );
+
+  app.use('*', function(req, res){
+    res.status(404);
+    res.send({ error: "URL Not found" });
+  });
   
 });
 

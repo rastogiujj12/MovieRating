@@ -5,6 +5,11 @@ const secureGlobal = (name, obj) => {
     });
 }
 
+const createResponse = (msg, data, error) => {
+  return { error, data, msg, success: !error };
+};
+
 module.exports = {
     secureGlobal,
+    createResponse
 }
