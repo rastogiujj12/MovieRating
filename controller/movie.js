@@ -10,25 +10,57 @@ const totalPageSize = 10;
 
 
 const getMovies = async (req, res, next) =>{
-    let {filter, page} = req.query;
-    let query={}
-    if(filter) {
-        let genre = await Genre.findOne({name:filter})
-        // console.log("genre", genre);
-        query = {"genre": { "$in" : [genre._id]} }
-    }
-    if(!page) page = 1;
-    let movieCount = await Movie.find(query).count();
-    await Movie
-    .find(query)
-    .sort({'name': 1})
-    .skip((page-1)*totalPageSize)
-    .populate("genre director createdBy modifiedBy")
-    .limit(totalPageSize)
-    .exec(function(err, movies) {
-        if(!err) res.send(createResponse("Fetch successful", {movies, count:movieCount}, null))
-        else next("Failed to fetch movies");
+    const schema = Joi.object().keys({
+        search: Joi.string(),
+        genre:Joi.array().items(Joi.string()),
+        page: Joi.number().default(1),
+        sortBy: Joi.string().default("name"),
+        asc:Joi.string().default(1)
     });
+    const { error, value } = schema.validate(req.query)
+    let {search, genre, page, sortBy, asc} = value;
+    if(!page) page = 1;
+    // console.log("search", search);
+    const query = {},sortObj={};
+    let directorSort = {},genreSort={};
+    switch (sortBy){
+        case "director":
+            directorSort["director.name"] = Number(asc);
+            break;
+        case "genre":
+            genreSort["genre.name"] = Number(asc);
+            break;
+        case "name":
+            sortObj["name"] = asc;
+            break;
+        case "imdbScore":
+            sortObj["imdbScore"] = asc;
+            break;
+        case "popularity99":
+            sortObj["popularity99"] = asc;
+            break;
+        default:
+            sortObj["name"] = asc;
+            break;
+    }
+    if(search){
+        let directorArray = (await Director.find({"name": { $regex: search, $options: 'i'}}, "_id").lean()).map( ({_id}) => _id);
+        console.log('director',directorArray);
+        query["$or"] = [
+            {"name": { $regex: search, $options: 'i'}},
+            {"director": { "$in": directorArray}}
+        ]
+    }
+    if(genre && Array.isArray(genre) && genre.length) query.genre = { $all : genre};
+
+    const movies = await Movie.find(query).populate("createdBy modifiedBy").populate({path:"director",options:directorSort})
+        .populate({path:"genre",options:genreSort})
+        .sort(sortObj)
+        .skip((page-1)*totalPageSize)
+        .limit(totalPageSize);
+    // console.log('movies',movies);
+    const count = await Movie.count(query).lean();
+    res.send(createResponse("Success",{movies,count},null));
 };
 
 const searchMovie = async (req, res, next) =>{
@@ -84,14 +116,14 @@ const createMoviesFromArray = async (movies, user) => {
         let genreList = [];
         try{
             for(let elem of movie.genre){
-                let temp = await Genre.findOne({name:elem})
+                let temp = await Genre.findOne({name:elem.trim()})
                 if(!temp) {
                     temp = await Genre.create({name:elem.trim()})
                 }
                 // console.log("genre", temp);
                 genreList.push(temp.id);
             }
-            let director = await Director.findOne({name:movie.director})
+            let director = await Director.findOne({name:movie.director.trim()})
             if(!director) director = await Director.create({name:movie.director.trim()})
 
             Movie.create({
@@ -122,7 +154,7 @@ const addSingleMovie = async (req, res, next) =>{
 
     if(!value.director._id){
         //create new director
-        let temp = await Director.findOne({name:value.director.name})
+        let temp = await Director.findOne({name:value.director.name.trim()})
         if(!temp) temp =  await Director.create({name:value.director.name.trim()})
         value.director = temp;
     }
@@ -130,7 +162,7 @@ const addSingleMovie = async (req, res, next) =>{
     for(let elem of value.genre){
         if(!elem._id){
             //create new genre
-            let temp = await Genre.findOne({name:elem})
+            let temp = await Genre.findOne({name:elem.trim()})
             if(!temp) temp = await Genre.create({name:elem.trim()})
             genreList.push(temp._id.toString())
         }
@@ -164,7 +196,7 @@ const editMovie = async (req, res, next) =>{
 
     if(!value.director._id){
         //create new director
-        let temp = await Director.findOne({name:value.director.name})
+        let temp = await Director.findOne({name:value.director.name.trim()})
         if(!temp) temp =  await Director.create({name:value.director.name.trim()})
         value.director = temp;
     }
@@ -172,7 +204,7 @@ const editMovie = async (req, res, next) =>{
     for(let elem of value.genre){
         if(!elem._id){
             //create new genre
-            let temp = await Genre.findOne({name:elem})
+            let temp = await Genre.findOne({name:elem.trim()})
             if(!temp) temp = await Genre.create({name:elem.trim()})
             genreList.push(temp._id.toString())
         }
