@@ -86,13 +86,13 @@ const createMoviesFromArray = async (movies, user) => {
             for(let elem of movie.genre){
                 let temp = await Genre.findOne({name:elem})
                 if(!temp) {
-                    temp = await Genre.create({name:elem})
+                    temp = await Genre.create({name:elem.trim()})
                 }
                 // console.log("genre", temp);
                 genreList.push(temp.id);
             }
             let director = await Director.findOne({name:movie.director})
-            if(!director) director = await Director.create({name:movie.director})
+            if(!director) director = await Director.create({name:movie.director.trim()})
 
             Movie.create({
                 name:movie.name,
@@ -123,7 +123,7 @@ const addSingleMovie = async (req, res, next) =>{
     if(!value.director._id){
         //create new director
         let temp = await Director.findOne({name:value.director.name})
-        if(!temp) temp =  await Director.create({name:value.director.name})
+        if(!temp) temp =  await Director.create({name:value.director.name.trim()})
         value.director = temp;
     }
     let genreList = [];
@@ -131,7 +131,7 @@ const addSingleMovie = async (req, res, next) =>{
         if(!elem._id){
             //create new genre
             let temp = await Genre.findOne({name:elem})
-            if(!temp) temp = await Genre.create({name:elem})
+            if(!temp) temp = await Genre.create({name:elem.trim()})
             genreList.push(temp._id.toString())
         }
         else genreList.push(elem._id);
@@ -165,7 +165,7 @@ const editMovie = async (req, res, next) =>{
     if(!value.director._id){
         //create new director
         let temp = await Director.findOne({name:value.director.name})
-        if(!temp) temp =  await Director.create({name:value.director.name})
+        if(!temp) temp =  await Director.create({name:value.director.name.trim()})
         value.director = temp;
     }
     let genreList = [];
@@ -173,7 +173,7 @@ const editMovie = async (req, res, next) =>{
         if(!elem._id){
             //create new genre
             let temp = await Genre.findOne({name:elem})
-            if(!temp) temp = await Genre.create({name:elem})
+            if(!temp) temp = await Genre.create({name:elem.trim()})
             genreList.push(temp._id.toString())
         }
         else genreList.push(elem._id);

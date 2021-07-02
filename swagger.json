@@ -5,7 +5,7 @@
         "version": "1.0.0",
         "title": "Movie Rating List"
     },
-    "host": "localhost:3000",
+    "host": "https://movie-rating-backend.herokuapp.com",
     "basePath": "/api",
     "tags":[
         {
@@ -319,7 +319,7 @@
                                     "genre":{
                                         "type":"array",
                                         "items":{
-                                            "type":"object",
+                                            "type":"string",
                                             "properties":{
                                                 "name":{
                                                     "type":"string"
