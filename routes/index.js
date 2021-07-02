@@ -14,27 +14,32 @@ router.group("/api", (app) => {
   app.post("/login", userController.login);
   app.post("/signup", userController.signup);
   
-  app.get("/getMovies",   moviesController.getMovies);
-  app.get("/searchMovie", moviesController.searchMovie);
+  app.get('/autologin', authMiddleware.loginValidate, userController.autoLogin)
+
+  app.get("/movie/get",    moviesController.getMovies);
+  app.get("/movie/search", moviesController.searchMovie);
   
-  app.put("/addMultipleMovies", 
+  app.put("/movie/addMultiple", 
     authMiddleware.loginValidate,
     moviesController.addMultipleMovies
   );
-  app.put("/addSingleMovie", 
+  app.put("/movie/addSingle", 
     authMiddleware.loginValidate,
     moviesController.addSingleMovie
   );
 
-  app.post("/editMovie",
+  app.post("/movie/edit",
     authMiddleware.loginValidate,
     moviesController.editMovie
   );
 
-  app.delete("/deleteMovie",
+  app.delete("/movie/delete",
     authMiddleware.loginValidate,
     moviesController.deleteMovie
   );
+
+  app.get("/genre/get", moviesController.getGenre);
+  app.get("/director/get", moviesController.getDirectors)
 
   app.use('*', function(req, res){
     res.status(404);

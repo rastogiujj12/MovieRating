@@ -106,7 +106,16 @@ const signup = async (req, res, next) =>{
 	} 
 }
 
+
+async function autoLogin(req, res){
+	if(req.user){
+		res.status(200).json({login:true});
+	}
+	else res.status(400).json({login:false});
+}
+
 module.exports = {
   login,
-  signup
+  signup,
+  autoLogin
 };

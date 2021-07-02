@@ -4,8 +4,9 @@ const Genre = require("../db/model/genre");
 const Director = require("../db/model/director")
 
 const { createResponse } = require("../utils/miscllaneous");
+const { create } = require("../db/model/movie");
 
-const totalPageSize = 20;
+const totalPageSize = 10;
 
 
 const getMovies = async (req, res, next) =>{
@@ -17,6 +18,7 @@ const getMovies = async (req, res, next) =>{
         query = {"genre": { "$in" : [genre._id]} }
     }
     if(!page) page = 1;
+    let movieCount = await Movie.find(query).count();
     await Movie
     .find(query)
     .sort({'name': 1})
@@ -24,7 +26,7 @@ const getMovies = async (req, res, next) =>{
     .populate("genre director createdBy modifiedBy")
     .limit(totalPageSize)
     .exec(function(err, movies) {
-        if(!err) res.send(createResponse("Fetch successful", movies, null))
+        if(!err) res.send(createResponse("Fetch successful", {movies, count:movieCount}, null))
         else next("Failed to fetch movies");
     });
 };
@@ -60,10 +62,10 @@ const searchMovie = async (req, res, next) =>{
 const addMultipleMovies = async (req, res, next) =>{
     const schema = Joi.object().keys({
         movies:Joi.array().items({
-            name:Joi.string().required(),
+            name:Joi.string().required().trim(),
             imdbScore:Joi.number().required(),
             popularity99:Joi.number().required(),
-            director:Joi.string().required(),
+            director:Joi.string().required().trim(),
             genre:Joi.array().items(Joi.string())
         })
     });
@@ -109,43 +111,94 @@ const createMoviesFromArray = async (movies, user) => {
 
 const addSingleMovie = async (req, res, next) =>{
     const schema = Joi.object().keys({
-        name:Joi.string().required(),
+        name:Joi.string().required().trim(),
         imdbScore:Joi.number().required(),
         popularity99:Joi.number().required(),
-        director:Joi.string().required(),
-        genre:Joi.array().items(Joi.string())
+        director:Joi.object().required(),
+        genre:Joi.array().items()
     });
     const { error, value } = schema.validate(req.body)
-    console.log("movie", value)
     if(error) next("Some error occured")
+
+    if(!value.director._id){
+        //create new director
+        let temp = await Director.findOne({name:value.director.name})
+        if(!temp) temp =  await Director.create({name:value.director.name})
+        value.director = temp;
+    }
+    let genreList = [];
+    for(let elem of value.genre){
+        if(!elem._id){
+            //create new genre
+            let temp = await Genre.findOne({name:elem})
+            if(!temp) temp = await Genre.create({name:elem})
+            genreList.push(temp._id.toString())
+        }
+        else genreList.push(elem._id);
+    }
 
     Movie.create({
         name:value.name,
         imdbScore:value.imdbScore,
         popularity99: value.popularity99,
-        genre: value.genre,
-        director: value.director,
+        genre: genreList,
+        director: value.director._id,
         createdBy: req.user.id
     }).catch(err => {}) //for dupilcate movies
 
-    res.send(createResponse("movies created", null, null))
-    
+    res.send(createResponse("movie created", null, null))
 };
 
 const editMovie = async (req, res, next) =>{
     const schema = Joi.object().keys({
-        _id:Joi.string().required(),
-        imdbScore:Joi.number(),
-        popularity99:Joi.number(),
-        director:Joi.string(),
-        genre:Joi.array().items(Joi.string())
+        _id:Joi.string().required().trim(),
+        name:Joi.string().required().trim(),
+        imdbScore:Joi.number().required(),
+        popularity99:Joi.number().required(),
+        director:Joi.object().required(),
+        genre:Joi.array().items()
     });
 
     const { error, value } = schema.validate(req.body)
+    if(error) console.log("error", error)
 
-    if(error) next("Input Validation failed")
+    if(!value.director._id){
+        //create new director
+        let temp = await Director.findOne({name:value.director.name})
+        if(!temp) temp =  await Director.create({name:value.director.name})
+        value.director = temp;
+    }
+    let genreList = [];
+    for(let elem of value.genre){
+        if(!elem._id){
+            //create new genre
+            let temp = await Genre.findOne({name:elem})
+            if(!temp) temp = await Genre.create({name:elem})
+            genreList.push(temp._id.toString())
+        }
+        else genreList.push(elem._id);
+    }
+
+    console.log("new movie", {
+        _id: value._id,
+        name:value.name,
+        imdbScore:value.imdbScore,
+        popularity99: value.popularity99,
+        genre: genreList,
+        director: value.director,
+        modifiedBy:req.user.id
+    })
+
     try{
-        await Movie.findOneAndUpdate({_id:value._id}, {...value, modifiedBy:req.user.id})    
+        let movie = await Movie.updateOne({_id:value._id}, { $set: {
+            name:value.name,
+            imdbScore:value.imdbScore,
+            popularity99: value.popularity99,
+            genre: genreList,
+            director: value.director._id,
+            modifiedBy:req.user.id
+        }})    
+        console.log("updated movie", movie)
     }
     catch(error){
         console.log("error", error)
@@ -156,7 +209,7 @@ const editMovie = async (req, res, next) =>{
 
 };
 
-const deleteMovie = async (req, res, next) =>{
+const deleteMovie = async (req, res, next) => {
     const schema = Joi.object().keys({
         _id:Joi.string().required()
     });
@@ -172,12 +225,28 @@ const deleteMovie = async (req, res, next) =>{
     res.send(createResponse("Delete successful", null, null))
 };
 
+const getGenre = async (req, res, next) => {
+    let genre = await Genre.find({}).sort({'name':1});
+
+    if(!genre) next("Some error occured")
+    res.send(createResponse("genre found", genre, null));
+}
+
+const getDirectors = async (req, res, next) => {
+    let directors = await Director.find({}).sort({'name':1});
+
+    if(!directors) next("Some error occured")
+    res.send(createResponse("Directors found", directors, null));
+}
+
 module.exports = {
     getMovies,
     searchMovie,
     addMultipleMovies,
     addSingleMovie,
     editMovie,
-    deleteMovie
+    deleteMovie,
+    getGenre,
+    getDirectors
   };
   
