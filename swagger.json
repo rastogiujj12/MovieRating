@@ -5,7 +5,7 @@
         "version": "1.0.0",
         "title": "Movie Rating List"
     },
-    "host": "https://movie-rating-backend.herokuapp.com",
+    "host": "movie-rating-backend.herokuapp.com",
     "basePath": "/api",
     "tags":[
         {
@@ -18,7 +18,6 @@
         }
     ],
     "schemes": [
-        "http",
         "https"
     ],
     "paths": {
@@ -118,7 +117,7 @@
                 }
             }
         },
-        "/getMovies": {
+        "/movie/get": {
             "get": {
                 "tags":[
                     "movie"
@@ -131,8 +130,15 @@
                 "parameters": [
                     {
                         "in": "query",
-                        "name":"filter",
-                        "description": "Filter for movies",
+                        "name":"search",
+                        "description": "Filter for movie and director's names",
+                        "required": false,
+                        "type":"string"
+                    },
+                    {
+                        "in": "query",
+                        "name":"genre",
+                        "description": "Genre Id",
                         "required": false,
                         "type":"string"
                     },
@@ -141,19 +147,38 @@
                         "name":"page",
                         "description": "Page number",
                         "required": false,
+                        "type":"number"
+                    },
+                    {
+                        "in": "query",
+                        "name":"sortBy",
+                        "description": "Sorting key",
+                        "required": false,
                         "type":"string"
+                    },
+                    {
+                        "in": "query",
+                        "name":"asc",
+                        "description": "Sorting order (1 or -1)",
+                        "required": false,
+                        "type":"number"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "data":[{
-                            "_id":"string",
-                            "name":"string",
-                            "director":"object",
-                            "imdbScore":"string",
-                            "popularity99":"string",
-                            "genre":"array"
-                        }],
+                        "data": {
+                            "movies": [
+                                {
+                                    "_id": "string",
+                                    "name": "string",
+                                    "director": "object",
+                                    "imdbScore": "string",
+                                    "popularity99": "string",
+                                    "genre": "array"
+                                }
+                            ],
+                            "count": "number"
+                        },
                         "description":"movie data array"
                     },
                     "405": {
@@ -163,46 +188,8 @@
                 }
             }
         },
-        "/getSingleMovie": {
-            "get": {
-                "tags":[
-                    "movie"
-                ],
-                "summary": "Get movie list",
-                "description": "This can only be done by the logged in user.",
-                "produces": [
-                    "application/json"
-                ],
-                "parameters": [
-                    {
-                        "in": "query",
-                        "name":"id",
-                        "description": "Filter for movies",
-                        "required": false,
-                        "type":"string"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "data":{
-                            "_id":"string",
-                            "name":"string",
-                            "director":"object",
-                            "imdbScore":"string",
-                            "popularity99":"string",
-                            "genre":"array"
-                        },
-                        "description":"movie object"
-                    },
-                    "405": {
-                        "error": true,
-                        "description": "Some error occured, try again later"
-                    }
-                }
-            }
-        },
 
-        "/addSingleMovie": {
+        "/movie/addSingle": {
             "put": {
                 "tags":[
                     "movie"
@@ -272,7 +259,7 @@
             }
         },
 
-        "/addMultipleMovies": {
+        "/movie/addMultiple": {
             "put": {
                 "tags":[
                     "movie"
@@ -344,7 +331,7 @@
                 }
             }
         },
-        "/editMovie": {
+        "/movie/edit": {
             "post": {
                 "tags":[
                     "movie"
@@ -414,7 +401,7 @@
                 }
             }
         },
-        "/deleteMovie":{
+        "/movie/delete":{
             "delete":{
                 "tags":[
                     "movie"
